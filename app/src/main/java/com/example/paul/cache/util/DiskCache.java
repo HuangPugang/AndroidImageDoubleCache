@@ -14,17 +14,19 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 /**
+ * 磁盘缓存
  * Created by paul on 15/12/28.
  */
 public class DiskCache implements ImageCache {
+    private static final String TAG = DiskCache.class.getSimpleName();
     static String mPath ;
     public DiskCache(Context context){
         init(context);
     }
     private void init(Context context){
         // 获取图片缓存路径
-        File cacheDir = getDiskCacheDir(context, "bitmap");
-//        File cacheDir = new File(mPath);
+        mPath = getDiskCachePath(context,"bitmap");
+        File cacheDir = new File(mPath);
         if (!cacheDir.exists()) {
             cacheDir.mkdirs();
         }
@@ -43,30 +45,26 @@ public class DiskCache implements ImageCache {
         FileOutputStream fileOutputStream = null;
         try {
             File file = new File(mPath+key);
-            if (!file.exists()){
-                Log.e("HPG","FILE not exist");
+            if (file.exists()){
+                Log.i(TAG,"File is exist on disk");
             }
-
             fileOutputStream = new FileOutputStream(mPath+key);
             bitmap.compress(Bitmap.CompressFormat.PNG,100,fileOutputStream);
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }finally {
-             if (fileOutputStream!=null){
-                 try {
-                     fileOutputStream.close();
-                 } catch (IOException e) {
-                     e.printStackTrace();
-                 }
-             }
+            CloseUtils.closeQuietly(fileOutputStream);
         }
     }
 
     /**
-     * 根据传入的uniqueName获取硬盘缓存的路径地址。
+     * 根据传入的dir获得路径
+     * @param context
+     * @param dir
+     * @return
      */
-    public File getDiskCacheDir(Context context, String uniqueName) {
+    public String getDiskCachePath(Context context, String dir) {
         String cachePath;
         if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())
                 || !Environment.isExternalStorageRemovable()) {
@@ -74,21 +72,7 @@ public class DiskCache implements ImageCache {
         } else {
             cachePath = context.getCacheDir().getPath();
         }
-        mPath = cachePath + File.separator + uniqueName;
-        return new File(cachePath + File.separator + uniqueName);
+        return cachePath + File.separator + dir;
     }
 
-    /**
-     * 获取当前应用程序的版本号。
-     */
-    public int getAppVersion(Context context) {
-        try {
-            PackageInfo info = context.getPackageManager().getPackageInfo(context.getPackageName(),
-                    0);
-            return info.versionCode;
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        }
-        return 1;
-    }
 }

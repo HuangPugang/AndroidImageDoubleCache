@@ -16,11 +16,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
+ * 图片下载类
  * Created by paul on 15/12/28.
  */
 public class ImageLoader {
     private static final String TAG = ImageLoader.class.getSimpleName();
+    
     private static ImageLoader sInstance;
+
     private DoubleCache mDoubleCache = null;
 
     private ExecutorService mExecutorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
@@ -49,6 +52,7 @@ public class ImageLoader {
     }
 
     private void submitLoadRequest(final String url, final ImageView imageView) {
+        Log.i(TAG,"Download,url:"+url);
         imageView.setTag(url);
         mExecutorService.submit(new Runnable() {
             @Override
@@ -81,7 +85,9 @@ public class ImageLoader {
             URL url1 = new URL(url);
             conn = (HttpURLConnection) url1.openConnection();
             bitmap = BitmapFactory.decodeStream(conn.getInputStream());
-            mDoubleCache.put(url,bitmap);
+            if (bitmap!=null){
+                mDoubleCache.put(url,bitmap);
+            }
         } catch (MalformedURLException e) {
             e.printStackTrace();
         } catch (Exception e) {
