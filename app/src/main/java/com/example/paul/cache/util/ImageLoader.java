@@ -8,7 +8,6 @@ import android.os.Message;
 import android.util.Log;
 import android.widget.ImageView;
 
-import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -21,17 +20,21 @@ import java.util.concurrent.Executors;
  */
 public class ImageLoader {
     private static final String TAG = ImageLoader.class.getSimpleName();
-    
+
     private static ImageLoader sInstance;
 
-    private DoubleCache mDoubleCache = null;
+    private ImageCache mCache = null;
 
     private ExecutorService mExecutorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
     private ImageLoader(Context context) {
-        mDoubleCache = new DoubleCache(context);
+        mCache = new DoubleCache(context);
     }
 
+    //设置缓存模式，用户可以定制自己需要缓存模式
+    private void setImageCache(ImageCache cache){
+        mCache = cache;
+    }
     public static ImageLoader getInstance(Context context) {
         if (sInstance == null) {
             synchronized (ImageLoader.class) {
@@ -42,10 +45,10 @@ public class ImageLoader {
     }
 
     public void displayImage(String url, ImageView imageView) {
-        Bitmap bitmap = mDoubleCache.get(url);
+        Bitmap bitmap = mCache.get(url);
         if (bitmap != null) {
             imageView.setImageBitmap(bitmap);
-            mDoubleCache.put(url,bitmap);
+            mCache.put(url, bitmap);
             return;
         }
         submitLoadRequest(url, imageView);
@@ -67,7 +70,7 @@ public class ImageLoader {
                         }
                     });
                 }
-                mDoubleCache.put(url, bitmap);
+                mCache.put(url, bitmap);
             }
         });
     }
@@ -86,7 +89,7 @@ public class ImageLoader {
             conn = (HttpURLConnection) url1.openConnection();
             bitmap = BitmapFactory.decodeStream(conn.getInputStream());
             if (bitmap!=null){
-                mDoubleCache.put(url,bitmap);
+                mCache.put(url, bitmap);
             }
         } catch (MalformedURLException e) {
             e.printStackTrace();
