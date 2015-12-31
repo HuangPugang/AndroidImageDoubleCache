@@ -2,7 +2,10 @@ package com.example.paul.cache.util;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.util.Log;
+
+import com.example.paul.cache.util.libcore.DiskCache;
+import com.example.paul.cache.util.libcore.ImageCache;
+import com.example.paul.cache.util.libcore.MemoryCache;
 
 /**
  * 双缓存操作类

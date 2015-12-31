@@ -1,4 +1,4 @@
-package com.example.paul.cache.util;
+package com.example.paul.cache.util.libcore;
 
 import android.graphics.Bitmap;
 import android.util.Log;

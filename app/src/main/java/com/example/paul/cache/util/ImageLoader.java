@@ -8,6 +8,8 @@ import android.os.Message;
 import android.util.Log;
 import android.widget.ImageView;
 
+import com.example.paul.cache.util.libcore.ImageCache;
+
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -23,7 +25,11 @@ public class ImageLoader {
 
     private static ImageLoader sInstance;
 
-    private ImageCache mCache = null;
+    private static ImageCache mCache = null;
+
+    private static int mLoadingImageId ;
+
+    private static int mErrorImageId;
 
     private ExecutorService mExecutorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
@@ -32,17 +38,17 @@ public class ImageLoader {
     }
 
     //设置缓存模式，用户可以定制自己需要缓存模式
-    private void setImageCache(ImageCache cache){
-        mCache = cache;
-    }
-    public static ImageLoader getInstance(Context context) {
-        if (sInstance == null) {
-            synchronized (ImageLoader.class) {
-                sInstance = new ImageLoader(context);
-            }
-        }
-        return sInstance;
-    }
+//    private void setImageCache(ImageCache cache){
+//        mCache = cache;
+//    }
+//    public static ImageLoader getInstance(Context context) {
+//        if (sInstance == null) {
+//            synchronized (ImageLoader.class) {
+//                sInstance = new ImageLoader(context);
+//            }
+//        }
+//        return sInstance;
+//    }
 
     public void displayImage(String url, ImageView imageView) {
         Bitmap bitmap = mCache.get(url);
@@ -101,5 +107,35 @@ public class ImageLoader {
             }
         }
         return bitmap;
+    }
+
+
+    private static void applyConfig(ImageLoader loader){
+        loader.mCache = mCache;
+    }
+    public static class Builder{
+        Context context;
+        public Builder(Context context){
+            this.context = context;
+        }
+        public Builder setImageCache(ImageCache cache){
+            mCache = cache;
+            return this;
+        }
+
+        public Builder setErrorImageId(int resId){
+            mErrorImageId = resId;
+            return this;
+        }
+        public Builder setLoadingImageId(int resId){
+            mLoadingImageId = resId;
+            return this;
+        }
+
+        public ImageLoader create(){
+            ImageLoader loader = new ImageLoader(context);
+            applyConfig(loader);
+            return loader;
+        }
     }
 }
